@@ -25,8 +25,8 @@ class Ant(object):
         current_node = self.path[-1]
         for i in self.possible_nodes:
             probabilities.append((pheromone[current_node, i]**alpha)*((1/distances[current_node, i])**beta))
+
         return probabilities/sum(probabilities)
-        
     
     def chose_next_node(self, distances, pheromone, alpha, beta):
         '''
@@ -47,4 +47,26 @@ class Ant(object):
         '''
         for i in range(distances.shape[0] - 1):
             self.chose_next_node(distances, pheromone, alpha, beta)
-                
+            
+    def calculate_distance(self, distances):
+        '''
+        Function to calculate the distance traveled by the ant
+        '''
+        current_node = self.path[0]
+        for i in range(len(self.path) - 1):
+            next_node = self.path[i+1]
+            self.distance += distances[current_node, next_node]
+            current_node = next_node
+        self.distance += distances[current_node, self.path[0]]
+            
+    def objectve_function(self, distance_cost):
+        '''
+        Function to calculate the objection function
+        '''
+        self.of_value = self.distance * distance_cost
+        
+    def of(self):
+        '''
+        Function to return the of value
+        '''
+        return self.of_value            

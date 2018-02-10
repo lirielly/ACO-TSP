@@ -10,11 +10,12 @@ from ant import Ant
 import numpy as np
 
 class AntColony(object):
-    def __init__(self, distances, pheromone, n_ants, n_best, n_iterations, 
+    def __init__(self, distances, distance_cost, n_ants, n_best, n_iterations, 
                  rho, alpha, beta):
         """
         Args:
             distances (2D numpy.array): Square matrix of distances. Diagonal is assumed to be np.inf.
+            distance_cost: Cost of one unit of distance
             n_ants (int): Number of ants running per iteration
             n_best (int): Number of best ants who deposit pheromone
             n_iteration (int): Number of iterations
@@ -22,22 +23,71 @@ class AntColony(object):
             alpha (int or float): exponenet on pheromone, higher alpha gives pheromone more weight. Default=1
             beta (int or float): exponent on distance, higher beta give distance more weight. Default=1
         Example:
-            ant_colony = AntColony(german_distances, 100, 20, 2000, 0.95, alpha=1, beta=2)          
+            ant_colony = AntColony(german_distances, 1.0, 100, 20, 2000, 0.95, alpha=1, beta=2)          
         """
         self.distances  = distances
-        self.pheromone = np.ones(self.distances.shape) # / len(distances)
+        self.distance_cost = distance_cost
+        self.pheromone = np.ones(self.distances.shape)
         self.n_ants = n_ants
         self.n_best = n_best
         self.n_iterations = n_iterations
         self.rho = rho
         self.alpha = alpha
         self.beta = beta
+   
+    
+    def find_n_bests_ants(self, colony):
+        '''
+        Function to find the n ants that will update the pheromone trail
+        '''
+        colony.sort(key=lambda ant: ant.of())
+        return colony[:self.n_best]
+    
+    
+    def go_through_path(self, ant, factor):
+        '''
+        Function to calculate the amount of pheromone to be deposited in trail piece 
+        '''
+        current_node = ant.path[0]
+        for i in range(len(ant.path) - 1):
+            next_node = ant.path[i + 1]
+            self.pheromone[current_node, next_node] += factor/ant.distance
+    
+    
+    def update_pheromone(self, best_ant, n_bests_ants):
+        '''
+        Function to update the pheromone matrix
+        '''
+        self.pheromone *= self.rho
+        
+        for i in range(self.n_best):
+            self.go_through_path(n_bests_ants[i], (self.n_best - i))
+                
+        self.go_through_path(best_ant, (self.n_best + 1))
+        
         
     def run(self):
-        colony = []
-        for i in range(self.n_ants):
-            ant = Ant(np.random.randint(self.distances.shape[0]), self.distances.shape[0])
-            ant.build_path(self.distances, self.pheromone, self.alpha, self.beta)
-            # TODO: calcular distancia e calcular FO
-            colony.append(ant)    
+        '''
+        Function to run the rank based Ant Colony Optimization algorithm
+        '''
+        best_ant = Ant(0, 0)
+        for i in range(self.n_iterations):
+            print("Iteration: %d Best OF: %f" %(i, best_ant.of()))
+            colony = []
+            for j in range(self.n_ants):
+                ant = Ant(np.random.randint(self.distances.shape[0]), self.distances.shape[0])
+                ant.build_path(self.distances, self.pheromone, self.alpha, self.beta)
+                ant.calculate_distance(self.distances)
+                ant.objectve_function(self.distance_cost)
+                colony.append(ant)    
+            
+            n_bests_ants = self.find_n_bests_ants(colony)
+            
+            if n_bests_ants[0].of() < best_ant.of():
+                best_ant = n_bests_ants[0]
+                
+            self.update_pheromone(best_ant, n_bests_ants)
+        print(self.pheromone)
+        return best_ant
+        
         
