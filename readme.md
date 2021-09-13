@@ -1,17 +1,19 @@
-// Clonar o repositório
-git clone <https://github.com/lirielly/ACO>
+# Traveling Salesman Problem solved using ACO
 
-// Mostrar status do diretório
-git status
+### Clonar o repositório
++ git clone <https://github.com/lirielly/ACO>
 
-// Adicionar arquivo modificado ou arquivo novo
-git add <arquivo> <*.txt> <*.csv>
+# Mostrar status do diretório
++ git status
 
-// Confirmar as alterações
-git commit -m "<mensagem curta explicando as alterações>"
+# Adicionar arquivo modificado ou arquivo novo
++ git add <arquivo> <*.txt> <*.csv>
 
-// Subir as alterações para o servidor
-git push origin master
+# Confirmar as alterações
++ git commit -m "<mensagem curta explicando as alterações>"
 
-// Baixar nova versão do código modificada em um outro local para o computador
-git pull
+# Subir as alterações para o servidor
++ git push origin master
+
+# Baixar nova versão do código modificada em um outro local para o computador
++ git pull
